@@ -90,6 +90,30 @@ STRESSES = 'ˌˈ'
 PRIMARY_STRESS = STRESSES[1]
 SECONDARY_STRESS = STRESSES[0]
 VOWELS = frozenset('AIOQWYaiuæɑɒɔəɛɜɪʊʌᵻ')
+
+UNIFICATION_MAP = {
+            # Vietnamese clusters (remove tie-bar)
+            "ŋ͡m": "ŋm",
+            "k͡p": "kp",
+            # Vietnamese Diphthongs -> Standard IPA
+            "aj": "aɪ",
+            "aw": "aʊ",
+            "ɔj": "ɔɪ",
+            # English Custom Diphthongs -> Standard IPA
+            "A": "eɪ",
+            "I": "aɪ",
+            "W": "aʊ",
+            "Y": "ɔɪ",
+            # English Affricates -> Standard IPA
+            "ʤ": "dʒ",
+            "ʧ": "tʃ",
+            # English Other -> Standard IPA
+            "ɹ": "r",
+            "ɑ": "a",
+        }
+        # Create a single regex for efficient replacement
+UNIFICATION_REGEX = re.compile('|'.join(re.escape(key) for key in UNIFICATION_MAP.keys()))
+
 def apply_stress(ps, stress):
     def restress(ps):
         ips = list(enumerate(ps))
@@ -646,6 +670,10 @@ class G2P:
         for _, _, i in indices:
             tokens[i].phonemes = apply_stress(tokens[i].phonemes, -0.5)
 
+    def _post_process(self, raw_phonemes):
+        """Applies the UNIFICATION_MAP to a raw phoneme string."""
+        return UNIFICATION_REGEX.sub(lambda m: self.UNIFICATION_MAP[m.group(0)], raw_phonemes)
+
     def __call__(self, text: str, preprocess=True) -> Tuple[str, List[MToken]]:
         preprocess = G2P.preprocess if preprocess == True else preprocess
         text, tokens, features = preprocess(text) if preprocess else (text, [], {})
@@ -705,4 +733,8 @@ class G2P:
                 if tk.phonemes:
                     tk.phonemes = tk.phonemes.replace('ɾ', 'T').replace('ʔ', 't')
         result = ''.join((self.unk if tk.phonemes is None else tk.phonemes) + tk.whitespace for tk in tokens)
+        result = self._post_process(result)
+        for token in tokens:
+            if token.phonemes is not None:
+                token.phonemes = self._post_process(token.phonemes)
         return result, tokens

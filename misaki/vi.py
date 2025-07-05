@@ -390,7 +390,40 @@ class VIG2P:
         en_g2p_kwargs["unk"] = '❓'
         self.en_g2p = G2P(**en_g2p_kwargs) if enable_en_g2p else lambda _: ('❓', [])
         self.cleaner = ViCleaner(clean_abbr=clean_abbr, clean_acronym=clean_acronym)
-    
+        # The heart of the post-processing step.
+        # This map converts intermediate symbols to standardized IPA.
+        # Keys are ordered from longest to shortest to ensure correct replacement.
+        self.UNIFICATION_MAP = {
+            # Vietnamese clusters (remove tie-bar)
+            "ŋ͡m": "ŋm",
+            "k͡p": "kp",
+            # Vietnamese Diphthongs -> Standard IPA
+            "aj": "aɪ",
+            "aw": "aʊ",
+            "ɔj": "ɔɪ",
+            # English Custom Diphthongs -> Standard IPA
+            "A": "eɪ",
+            "I": "aɪ",
+            "W": "aʊ",
+            "Y": "ɔɪ",
+            # English Affricates -> Standard IPA
+            "ʤ": "dʒ",
+            "ʧ": "tʃ",
+            # English Other -> Standard IPA
+            "ɹ": "r",
+            "ɑ": "a",
+        }
+        # Create a single regex for efficient replacement
+        self.unification_regex = re.compile('|'.join(re.escape(key) for key in self.UNIFICATION_MAP.keys()))
+
+    def _post_process(self, raw_phonemes):
+        """Applies the UNIFICATION_MAP to a raw phoneme string."""
+        return self.unification_regex.sub(lambda m: self.UNIFICATION_MAP[m.group(0)], raw_phonemes)
+
+    def _convert(self, word, dialect, glottal, pham, cao, palatals, delimit):
+        ipa = convert(word, dialect, glottal, pham, cao, palatals, delimit)
+        return self._post_process(ipa)
+
     def substr2ipa(self, tk, ipa):
         """
         Approximation of foreign name pronunciation
@@ -424,7 +457,7 @@ class VIG2P:
             mapping = VI if VI_ONLY.search(tk) is not None else EN
             return [
                 (tk, char, 
-                 convert(mapping.get(char, char), self.dialect, self.glottal, self.pham, self.cao, self.palatals, '/'))
+                 self._convert(mapping.get(char, char), self.dialect, self.glottal, self.pham, self.cao, self.palatals, '/'))
                 for char in tk.lower()
             ]
         
@@ -432,6 +465,7 @@ class VIG2P:
         tk = tk.lower()
         if VI_ONLY.search(tk) is None:
             eng, _ = self.en_g2p(tk)
+            eng = self._post_process(eng)
             if '❓' not in eng:
                 return [(None, tk, eng)]
 
@@ -444,7 +478,7 @@ class VIG2P:
         while tk:
             if len(tk) == 1:
                 char = tk
-                _ipa = convert(
+                _ipa = self._convert(
                     VI.get(char, char), self.dialect, self.glottal, self.pham, self.cao, self.palatals, '/'
                 )
                 parents.appendleft(orig_tk)
@@ -456,7 +490,7 @@ class VIG2P:
             for i in range(len(tk) - 1, -1, -1):
                 tkc = tk[i:]
                 sub_tk = tkc if len(tkc) > 1 else VI.get(tkc, tkc)
-                _ipa = convert(
+                _ipa = self._convert(
                     sub_tk, self.dialect, self.glottal, self.pham, self.cao, self.palatals, '/'
                 )
                 if '[' not in _ipa:
@@ -523,7 +557,7 @@ class VIG2P:
                 mtokens.append(MToken(tk, '', ' ', custom_ipa))
                 continue
 
-            first_try = convert(tk.lower(), self.dialect, self.glottal, self.pham, self.cao, self.palatals, '/')
+            first_try = self._convert(tk.lower(), self.dialect, self.glottal, self.pham, self.cao, self.palatals, '/')
             parent_tk_ipas = self.substr2ipa(tk, first_try)
             for parent, tk, ipa in parent_tk_ipas:
                 if '/' in ipa:
