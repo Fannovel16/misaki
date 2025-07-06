@@ -401,17 +401,22 @@ class VIG2P:
             "aj": "aɪ",
             "aw": "aʊ",
             "ɔj": "ɔɪ",
+            # Minimal approximation
+            "ʂ": "s",    # sa -> sa
+            "ʐ": "z",    # ra -> za
             # English Custom Diphthongs -> Standard IPA
             "A": "eɪ",
             "I": "aɪ",
             "W": "aʊ",
             "Y": "ɔɪ",
-            # English Affricates -> Standard IPA
-            "ʤ": "dʒ",
-            "ʧ": "tʃ",
             # English Other -> Standard IPA
             "ɹ": "r",
             "ɑ": "a",
+            # American English-only symbols -> Standard IPA
+            "O": "oʊ", # American "oh"
+            "ᵻ": "ɪ",   # Common simplification for this unstressed vowel
+            # British English-only symbols -> Standard IPA
+            "Q": "əʊ", # British "oh"
         }
         # Create a single regex for efficient replacement
         self.unification_regex = re.compile('|'.join(re.escape(key) for key in self.UNIFICATION_MAP.keys()))

@@ -92,26 +92,21 @@ SECONDARY_STRESS = STRESSES[0]
 VOWELS = frozenset('AIOQWYaiuæɑɒɔəɛɜɪʊʌᵻ')
 
 UNIFICATION_MAP = {
-            # Vietnamese clusters (remove tie-bar)
-            "ŋ͡m": "ŋm",
-            "k͡p": "kp",
-            # Vietnamese Diphthongs -> Standard IPA
-            "aj": "aɪ",
-            "aw": "aʊ",
-            "ɔj": "ɔɪ",
-            # English Custom Diphthongs -> Standard IPA
-            "A": "eɪ",
-            "I": "aɪ",
-            "W": "aʊ",
-            "Y": "ɔɪ",
-            # English Affricates -> Standard IPA
-            "ʤ": "dʒ",
-            "ʧ": "tʃ",
-            # English Other -> Standard IPA
-            "ɹ": "r",
-            "ɑ": "a",
-        }
-        # Create a single regex for efficient replacement
+    # English Custom Diphthongs -> Standard IPA
+    "A": "eɪ",
+    "I": "aɪ",
+    "W": "aʊ",
+    "Y": "ɔɪ",
+    # English Other -> Standard IPA
+    "ɹ": "r",
+    "ɑ": "a",
+    # American English-only symbols -> Standard IPA
+    "O": "oʊ", # American "oh"
+    "ᵻ": "ɪ",   # Common simplification for this unstressed vowel
+    # British English-only symbols -> Standard IPA
+    "Q": "əʊ", # British "oh"
+}
+# Create a single regex for efficient replacement
 UNIFICATION_REGEX = re.compile('|'.join(re.escape(key) for key in UNIFICATION_MAP.keys()))
 
 def apply_stress(ps, stress):
