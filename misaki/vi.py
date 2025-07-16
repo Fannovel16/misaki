@@ -543,12 +543,12 @@ class VIG2P:
                 if tk in [')', '}', ']']:
                     tk = ')'
                 IPA.append(tk)
-                mtokens.append(MToken(tk, '', ' ', tk))
+                mtokens.append(MToken(tk, '', '', tk))
                 continue
             if tk in ['(', '{', '[']:
                 tk = '('
                 IPA.append(tk)
-                mtokens.append(MToken(tk, '', ' ', tk))
+                mtokens.append(MToken(tk, '', '', tk))
                 continue
             if tk in ['"', "'", '–', '“', '”']:
                 if tk in ['“', '”']: tk = '"'
@@ -578,6 +578,8 @@ class VIG2P:
                     codas=codas,
                     tone=tone
                 )))
-        return ' '.join(IPA), mtokens
+        IPA = ' '.join(IPA)
+        IPA = re.sub(r'\s*([.,!?;:()"])\s*', r'\1', IPA)
+        return IPA, mtokens
 
 __all__ = [VIG2P, vi_syms]

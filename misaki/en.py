@@ -666,8 +666,9 @@ class G2P:
             tokens[i].phonemes = apply_stress(tokens[i].phonemes, -0.5)
 
     def _post_process(self, raw_phonemes):
-        """Applies the UNIFICATION_MAP to a raw phoneme string."""
-        return UNIFICATION_REGEX.sub(lambda m: UNIFICATION_MAP[m.group(0)], raw_phonemes)
+        phonemes = UNIFICATION_REGEX.sub(lambda m: UNIFICATION_MAP[m.group(0)], raw_phonemes)
+        phonemes = re.sub(r'\s*([.,!?;:()"])\s*', r'\1', phonemes)
+        return phonemes
 
     def __call__(self, text: str, preprocess=True) -> Tuple[str, List[MToken]]:
         preprocess = G2P.preprocess if preprocess == True else preprocess
