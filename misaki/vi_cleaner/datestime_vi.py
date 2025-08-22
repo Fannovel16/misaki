@@ -1,6 +1,6 @@
 import re
 
-from vietnam_number.number2word import n2w
+from .num2vi import n2w
 from .symbol_vi import vietnamese_re, vietnamese_for_date_re
 from .roman_number_vi import normalize_roman_numbers
 
