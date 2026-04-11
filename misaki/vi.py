@@ -390,7 +390,6 @@ class VIG2P:
         en_g2p_kwargs["unk"] = '❓'
         self.en_g2p = G2P(**en_g2p_kwargs) if enable_en_g2p else lambda _: ('❓', [])
         self.cleaner = ViCleaner(clean_abbr=clean_abbr, clean_acronym=clean_acronym)
-<<<<<<< HEAD
         # The heart of the post-processing step.
         # This map converts intermediate symbols to standardized IPA.
         # Keys are ordered from longest to shortest to ensure correct replacement.
@@ -430,9 +429,6 @@ class VIG2P:
         ipa = convert(word, dialect, glottal, pham, cao, palatals, delimit)
         return self._post_process(ipa)
 
-=======
-    
->>>>>>> upstream/main
     def substr2ipa(self, tk, ipa):
         """
         Approximation of foreign name pronunciation
@@ -466,11 +462,7 @@ class VIG2P:
             mapping = VI if VI_ONLY.search(tk) is not None else EN
             return [
                 (tk, char, 
-<<<<<<< HEAD
                  self._convert(mapping.get(char, char), self.dialect, self.glottal, self.pham, self.cao, self.palatals, '/'))
-=======
-                 convert(mapping.get(char, char), self.dialect, self.glottal, self.pham, self.cao, self.palatals, '/'))
->>>>>>> upstream/main
                 for char in tk.lower()
             ]
         
@@ -491,11 +483,7 @@ class VIG2P:
         while tk:
             if len(tk) == 1:
                 char = tk
-<<<<<<< HEAD
                 _ipa = self._convert(
-=======
-                _ipa = convert(
->>>>>>> upstream/main
                     VI.get(char, char), self.dialect, self.glottal, self.pham, self.cao, self.palatals, '/'
                 )
                 parents.appendleft(orig_tk)
@@ -507,11 +495,7 @@ class VIG2P:
             for i in range(len(tk) - 1, -1, -1):
                 tkc = tk[i:]
                 sub_tk = tkc if len(tkc) > 1 else VI.get(tkc, tkc)
-<<<<<<< HEAD
                 _ipa = self._convert(
-=======
-                _ipa = convert(
->>>>>>> upstream/main
                     sub_tk, self.dialect, self.glottal, self.pham, self.cao, self.palatals, '/'
                 )
                 if '[' not in _ipa:
@@ -559,20 +543,12 @@ class VIG2P:
                 if tk in [')', '}', ']']:
                     tk = ')'
                 IPA.append(tk)
-<<<<<<< HEAD
                 mtokens.append(MToken(tk, '', '', tk))
-=======
-                mtokens.append(MToken(tk, '', ' ', tk))
->>>>>>> upstream/main
                 continue
             if tk in ['(', '{', '[']:
                 tk = '('
                 IPA.append(tk)
-<<<<<<< HEAD
                 mtokens.append(MToken(tk, '', '', tk))
-=======
-                mtokens.append(MToken(tk, '', ' ', tk))
->>>>>>> upstream/main
                 continue
             if tk in ['"', "'", '–', '“', '”']:
                 if tk in ['“', '”']: tk = '"'
@@ -586,11 +562,7 @@ class VIG2P:
                 mtokens.append(MToken(tk, '', ' ', custom_ipa))
                 continue
 
-<<<<<<< HEAD
             first_try = self._convert(tk.lower(), self.dialect, self.glottal, self.pham, self.cao, self.palatals, '/')
-=======
-            first_try = convert(tk.lower(), self.dialect, self.glottal, self.pham, self.cao, self.palatals, '/')
->>>>>>> upstream/main
             parent_tk_ipas = self.substr2ipa(tk, first_try)
             for parent, tk, ipa in parent_tk_ipas:
                 if '/' in ipa:
@@ -606,12 +578,8 @@ class VIG2P:
                     codas=codas,
                     tone=tone
                 )))
-<<<<<<< HEAD
         IPA = ' '.join(IPA)
         IPA = re.sub(r'\s*([.,!?;:()"])\s*', r'\1', IPA)
         return IPA, mtokens
-=======
-        return ' '.join(IPA), mtokens
->>>>>>> upstream/main
 
 __all__ = [VIG2P, vi_syms]
